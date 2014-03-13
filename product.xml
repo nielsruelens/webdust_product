@@ -17,6 +17,15 @@
                             </field>
                         </group>
                     </page>
+                    <page groups="base.group_user" string="Images">
+                        <group name="images">
+                            <field name="images">
+								<tree editable="bottom" string="Images">
+                                    <field name="url"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
                 </xpath>
                 <xpath expr="//field[@name='cost_price']" position="after">
 					<field name="recommended_price"/>

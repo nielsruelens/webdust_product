@@ -13,6 +13,7 @@ class product_product(osv.Model):
         'properties': fields.one2many('webdust.product.property', 'product_id', 'Properties'),
         'recommended_price': fields.float('Recommended Price', digits_compute=dp.get_precision('Product Price'), help="Recommended retail price"),
         'short_description': fields.char('Short Description', size=256, required=False),
+        'images': fields.one2many('webdust.image', 'product_id', 'Images'),
     }
 
 
