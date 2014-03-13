@@ -21,6 +21,7 @@
                         <group name="images">
                             <field name="images">
 								<tree editable="bottom" string="Images">
+                                    <field name="supplier"/>
                                     <field name="url"/>
                                 </tree>
                             </field>
