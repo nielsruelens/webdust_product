@@ -36,5 +36,28 @@
 				</xpath>
             </field>
         </record>
+
+
+       <record id="webdust_product_tree" model="ir.ui.view">
+            <field name="name">webdust.product.tree</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree[@string='Products']" position="attributes">
+                    <attribute name="colors">blue:state in ('draft', 'end', 'obsolete');black:state not in ('draft', 'end', 'obsolete')</attribute>
+                </xpath>
+                <field name="default_code" position="replace">
+                    <field name="ean13"/>
+                </field>
+                <field name="name" position="after">
+                    <field name="short_description"/>
+                </field>
+ 				<field name="qty_available" position="replace"/>
+				<field name="virtual_available" position="replace"/>
+            </field>
+        </record>
+
+
+
     </data>
 </openerp>
