@@ -34,6 +34,17 @@
                 <xpath expr="//group[@string='Sale Conditions']" position="inside">
 					<field name="short_description"/>
 				</xpath>
+
+                <xpath expr="//field[@name='seller_ids']" position="replace">
+                	<field name="seller_ids">
+						<tree string="Suppliers">
+		                    <field name="name"/>
+		                    <field name="delay"/>
+		                    <field name="min_qty"/>
+		                    <field name="default_price"/>
+		                </tree>
+		            </field>
+				</xpath>
             </field>
         </record>
 
