@@ -24,8 +24,13 @@ class product_supplierinfo(osv.Model):
         return res
 
     _columns = {
+        'state': fields.selection([('available','Available'), ('limited','Limited Stock'),('unavailable', 'Unavailable')], 'Status', required=True),
         'default_price': fields.function(_default_price,
                                       method=True,
                                       string='Lowest Price',
                                       digits_compute = dp.get_precision('Sale Price')),
+    }
+
+    _defaults = {
+        'state': 'unavailable',
     }

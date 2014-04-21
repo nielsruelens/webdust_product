@@ -15,6 +15,7 @@
     'data': [
         'product.xml',
         'property.xml',
+        'supplierinfo.xml'
     ],
     'demo': [
     ],

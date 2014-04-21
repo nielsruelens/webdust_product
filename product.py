@@ -59,54 +59,35 @@ class product_product(osv.Model):
             -----------------------
             This method overwrites the standard OpenERP write() method
             to make sure all required pricing/availability stays in sync.
-            The extension only applies if it the method is called for
-            a single product.
             ------------------------------------------------------------- '''
 
-        if len(ids) == 1:
-            (product,) = self.browse(cr, uid, ids, context=context)
-
-            procure_method = False
-            state = False
-            qty_available = 0
-            seller_ids = 0
-
-            if 'procure_method' in vals: procure_method = vals['procure_method']
-            else: procure_method = product.procure_method
-
-            if 'state' in vals: state = vals['state']
-            else: state = product.state
-
-            if 'qty_available' in vals: qty_available = vals['qty_available']
-            else: qty_available = product.qty_available
-
-            seller_ids = len(product.seller_ids)
-            if 'seller_ids' in vals:
-                to_delete = [x for x in vals['seller_ids'] if x[0] == 2]
-                if to_delete and len(to_delete) == seller_ids and not [x for x in vals['seller_ids'] if x[0] != 2]:
-                    seller_ids = 0
-                else:
-                    seller_ids = 1
-
-
-            # Draw a conclusion, can this product be sold?
-            # --------------------------------------------
-            if procure_method == 'make_to_order':
-
-                vals['purchase_ok'] = True
-                vals['sale_ok'] = True
-                if state == 'obsolete' or seller_ids == 0:
-                    vals['purchase_ok'] = False
-                    vals['sale_ok'] = False
-
-            elif procure_method == 'make_to_stock':
-                vals['sale_ok'] = True
-                if state == 'obsolete' or qty_available == 0:
-                    vals['sale_ok'] = False
-
-
+        # Perform the super update before revalidating the ok flags.
+        # This way we can avoid deserializing the vals and the objects
+        # in a tiresome comparison process
+        # ------------------------------------------------------------
         result = super(product_product, self).write(cr, uid, ids, vals, context=context)
+
+        for product in self.browse(cr, uid, ids, context=context):
+
+            # Make to order
+            # -------------
+            if product.procure_method == 'make_to_order':
+                vals = {'sale_ok' : True, 'purchase_ok' : True}
+                if product.state == 'obsolete' or len(product.seller_ids) == 0 or not [x for x in product.seller_ids if x.state == 'available' or x.state == 'limited' ]:
+                    vals = {'sale_ok' : False, 'purchase_ok' : False}
+
+            # Make to stock
+            # -------------
+            elif product.procure_method == 'make_to_stock':
+                vals = {'sale_ok' : True, 'purchase_ok' : False}
+                if product.state == 'obsolete' or product.qty_available == 0:
+                    vals['sale_ok'] = False
+
+            super(product_product, self).write(cr, uid, product.id, vals, context=context)
+
+
         return result
+
 
 
 
