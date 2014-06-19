@@ -10,6 +10,7 @@ class webdust_property(osv.Model):
     _columns = {
         'name' : fields.char('Name', size=64, required=True),
         'info' : fields.char('Info', size=256),
+        'visibility': fields.selection([('internal','Internal'),('external','External')], 'Visibility'),
     }
 
 

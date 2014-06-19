@@ -9,6 +9,7 @@
             <field name="arch" type="xml">
                 <tree editable="bottom" string="Properties">
                     <field name="name"/>
+                    <field name="visibility"/>
                     <field name="info"/>
                 </tree>
             </field>
