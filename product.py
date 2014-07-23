@@ -66,24 +66,29 @@ class product_product(osv.Model):
         # in a tiresome comparison process
         # ------------------------------------------------------------
         result = super(product_product, self).write(cr, uid, ids, vals, context=context)
+        supplier_db = self.pool.get('product.supplierinfo')
 
-        for product in self.browse(cr, uid, ids, context=context):
+        for product in self.read(cr, uid, ids, ['id', 'procure_method', 'state', 'seller_ids', 'qty_available'], context=context):
 
             # Make to order
             # -------------
-            if product.procure_method == 'make_to_order':
+            if product['procure_method'] == 'make_to_order':
                 vals = {'sale_ok' : True, 'purchase_ok' : True}
-                if product.state == 'obsolete' or len(product.seller_ids) == 0 or not [x for x in product.seller_ids if x.state == 'available' or x.state == 'limited' ]:
+                if product['state'] == 'obsolete' or len(product['seller_ids']) == 0:
                     vals = {'sale_ok' : False, 'purchase_ok' : False}
+                else:
+                    supplier_info = supplier_db.read(cr, uid, product['seller_ids'], ['state'], context=context)
+                    if not [x for x in supplier_info if x['state'] == 'available' or x['state'] == 'limited' ]:
+                        vals = {'sale_ok' : False, 'purchase_ok' : False}
 
             # Make to stock
             # -------------
-            elif product.procure_method == 'make_to_stock':
+            elif product['procure_method'] == 'make_to_stock':
                 vals = {'sale_ok' : True, 'purchase_ok' : False}
-                if product.state == 'obsolete' or product.qty_available == 0:
+                if product['state'] == 'obsolete' or product['qty_available'] == 0:
                     vals['sale_ok'] = False
 
-            super(product_product, self).write(cr, uid, product.id, vals, context=context)
+            super(product_product, self).write(cr, uid, product['id'], vals, context=context)
 
 
         return result
