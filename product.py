@@ -68,13 +68,13 @@ class product_product(osv.Model):
         result = super(product_product, self).write(cr, uid, ids, vals, context=context)
         supplier_db = self.pool.get('product.supplierinfo')
 
-        for product in self.read(cr, uid, ids, ['id', 'procure_method', 'state', 'seller_ids', 'qty_available'], context=context):
+        for product in self.read(cr, uid, ids, ['id', 'procure_method', 'state', 'cost_price', 'seller_ids', 'qty_available'], context=context):
 
             # Make to order
             # -------------
             if product['procure_method'] == 'make_to_order':
                 vals = {'sale_ok' : True, 'purchase_ok' : True}
-                if product['state'] == 'obsolete' or len(product['seller_ids']) == 0:
+                if product['state'] == 'obsolete' or len(product['seller_ids']) == 0 or not product['cost_price']:
                     vals = {'sale_ok' : False, 'purchase_ok' : False}
                 else:
                     supplier_info = supplier_db.read(cr, uid, product['seller_ids'], ['state'], context=context)
