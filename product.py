@@ -77,8 +77,8 @@ class product_product(osv.Model):
                 if product['state'] == 'obsolete' or len(product['seller_ids']) == 0 or not product['cost_price']:
                     vals = {'sale_ok' : False, 'purchase_ok' : False}
                 else:
-                    supplier_info = supplier_db.read(cr, uid, product['seller_ids'], ['state'], context=context)
-                    if not [x for x in supplier_info if x['state'] == 'available' or x['state'] == 'limited' ]:
+                    supplier_info = supplier_db.read(cr, uid, product['seller_ids'], ['state', 'product_code'], context=context)
+                    if not [x for x in supplier_info if x['state'] in ('available','limited') and x['product_code'] and x['product_code'][:4] == '1015' ]:
                         vals = {'sale_ok' : False, 'purchase_ok' : False}
 
             # Make to stock
