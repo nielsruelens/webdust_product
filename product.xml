@@ -34,6 +34,9 @@
                 <xpath expr="//group[@string='Sale Conditions']" position="inside">
 					<field name="short_description"/>
 				</xpath>
+                <xpath expr="//group[@string='Storage Location']" position="inside">
+					<field name="supplier_storage_location"/>
+				</xpath>
 
                 <xpath expr="//field[@name='seller_ids']" position="replace">
                 	<field name="seller_ids">

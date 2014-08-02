@@ -40,6 +40,7 @@ class product_product(osv.Model):
         'images': fields.one2many('webdust.image', 'product_id', 'Images'),
         'cost_method': fields.selection([('standard','Standard Price'), ('average','Average Price'),('lowest', 'Lowest Price')], 'Costing Method', required=True,
             help="Standard Price: The cost price is manually updated at the end of a specific period (usually every year). \nAverage Price: The cost price is recomputed at each incoming shipment.\nLowest Price: The cost price is recomputed every time the product is changed, based on current supplier pricing data."),
+        'supplier_storage_location': fields.char('Supplier Storage Location', size=20, required=False),
         'cost_price': fields.function(_cost_price,
                                       method=True,
                                       string='Cost Price',
@@ -78,7 +79,7 @@ class product_product(osv.Model):
                     vals = {'sale_ok' : False, 'purchase_ok' : False}
                 else:
                     supplier_info = supplier_db.read(cr, uid, product['seller_ids'], ['state', 'product_code'], context=context)
-                    if not [x for x in supplier_info if x['state'] in ('available','limited') and x['product_code'] and x['product_code'][:4] == '1015' ]:
+                    if not [x for x in supplier_info if x['state'] in ('available','limited') and x['product_code']]:
                         vals = {'sale_ok' : False, 'purchase_ok' : False}
 
             # Make to stock
