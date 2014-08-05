@@ -34,6 +34,7 @@ class product_product(osv.Model):
         return result
 
     _columns = {
+        'change_hash': fields.char('Change Hash', size=30, required=False),
         'properties': fields.one2many('webdust.product.property', 'product_id', 'Properties'),
         'recommended_price': fields.float('Recommended Price', digits_compute=dp.get_precision('Product Price'), help="Recommended retail price"),
         'short_description': fields.char('Short Description', size=256, required=False),
@@ -67,38 +68,47 @@ class product_product(osv.Model):
         # in a tiresome comparison process
         # ------------------------------------------------------------
         result = super(product_product, self).write(cr, uid, ids, vals, context=context)
-        supplier_db = self.pool.get('product.supplierinfo')
 
-        for product in self.read(cr, uid, ids, ['id', 'procure_method', 'state', 'cost_price', 'seller_ids', 'qty_available', 'supplier_storage_location'], context=context):
+        for product in self.browse(cr, uid, ids, context=context):
 
             # Make to order
             # -------------
-            if product['procure_method'] == 'make_to_order':
+            if product.procure_method == 'make_to_order':
                 vals = {'sale_ok' : True, 'purchase_ok' : True}
-                if product['state'] == 'obsolete' or len(product['seller_ids']) == 0 or not product['cost_price'] or product['supplier_storage_location'] != '1015':
+                if product.state == 'obsolete' or len(product.seller_ids) == 0 or not product.cost_price or product.supplier_storage_location != '1015':
                     vals = {'sale_ok' : False, 'purchase_ok' : False}
                 else:
-                    supplier_info = supplier_db.read(cr, uid, product['seller_ids'], ['state', 'product_code'], context=context)
-                    if not [x for x in supplier_info if x['state'] in ('available','limited') and x['product_code']]:
+                    if not [x for x in product.seller_ids if x.state in ('available','limited') and x.product_code]:
                         vals = {'sale_ok' : False, 'purchase_ok' : False}
 
             # Make to stock
             # -------------
-            elif product['procure_method'] == 'make_to_stock':
+            elif product.procure_method == 'make_to_stock':
                 vals = {'sale_ok' : True, 'purchase_ok' : False}
-                if product['state'] == 'obsolete' or product['qty_available'] == 0:
-                    vals['sale_ok'] = False
+                if product.state == 'obsolete' or product.qty_available == 0:
+                    vals = {'sale_ok' : False, 'purchase_ok' : False}
 
-            super(product_product, self).write(cr, uid, product['id'], vals, context=context)
+            # Calculate change hash
+            # ---------------------
+            change_hash = [
+                product.name,                   vals['sale_ok'],
+                product.short_description,      vals['purchase_ok'],
+                product.procure_method,         product.type,
+                product.state,                  product.recommended_price,
+                product.ean13,                  product.categ_id.id,
+                product.cost_method,            product.supplier_storage_location
+            ]
+            change_hash.append([x.id for x in product.taxes_id])
+            change_hash.append([x.id for x in product.supplier_taxes_id])
+            change_hash.append([(x.supplier.id, x.url) for x in product.images])
+            change_hash.append([(x.name.id, x.value) for x in product.properties])
+            change_hash.append([(x.name.id, x.min_qty, x.product_code, x.state, [(y.min_quantity, y.price) for y in x.pricelist_ids]) for x in product.seller_ids])
+            vals['change_hash'] = hash(str(change_hash))
+
+            super(product_product, self).write(cr, uid, product.id, vals, context=context)
 
 
         return result
-
-
-
-
-
-
 
 
 
