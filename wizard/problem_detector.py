@@ -60,6 +60,7 @@ class webdust_product_problem_detector(osv.TransientModel):
         # The easy ones
         # -------------
         result.append([(0,0,{'product': x['id'], 'problem': 'Product is obsolete, yet it is sellable.'}) for x in products if x['state'] == 'obsolete'])
+        result.append([(0,0,{'product': x['id'], 'problem': 'Product is in draft, yet it is sellable.'}) for x in products if x['state'] == 'draft'])
         result.append([(0,0,{'product': x['id'], 'problem': 'Product does not have any sellers, yet it is sellable.'}) for x in products if not x['seller_ids']])
         result.append([(0,0,{'product': x['id'], 'problem': 'Product does not have supplier storage location 1015, yet it is sellable.'}) for x in products if  x['supplier_storage_location'] != '1015'])
 
