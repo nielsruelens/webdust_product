@@ -40,6 +40,14 @@ class webdust_product_problem_detector(osv.TransientModel):
             'target': 'new',
         }
 
+    def fix(self, cr, uid, ids, context=None):
+
+        prod_db = self.pool.get('product.product')
+        for wizard in self.browse(cr, uid, ids):
+            if wizard.problems:
+                prod_db.write(cr, uid, [x.product.id for x in wizard.problems], {}, context=context)
+        return self.start(cr, uid, ids, context)
+
 
     def calculate(self, cr, uid):
         prod_db = self.pool.get('product.product')
@@ -54,6 +62,10 @@ class webdust_product_problem_detector(osv.TransientModel):
         result.append([(0,0,{'product': x['id'], 'problem': 'Product is obsolete, yet it is sellable.'}) for x in products if x['state'] == 'obsolete'])
         result.append([(0,0,{'product': x['id'], 'problem': 'Product does not have any sellers, yet it is sellable.'}) for x in products if not x['seller_ids']])
         result.append([(0,0,{'product': x['id'], 'problem': 'Product does not have supplier storage location 1015, yet it is sellable.'}) for x in products if  x['supplier_storage_location'] != '1015'])
+
+        # The hard ones
+        # -------------
+
         return result
 
 
