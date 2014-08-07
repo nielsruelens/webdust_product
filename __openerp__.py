@@ -16,7 +16,8 @@
         'product.xml',
         'property.xml',
         'supplierinfo.xml',
-        'wizard/price_export_view.xml'
+        'wizard/price_export_view.xml',
+        'wizard/problem_detector_view.xml'
     ],
     'demo': [
     ],

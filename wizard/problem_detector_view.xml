@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="product_problem_view" model="ir.ui.view">
+            <field name="name">product.problem.view</field>
+            <field name="model">webdust.product.problem.detector</field>
+            <field name="arch" type="xml">
+                <form string="Product Problems" version="7.0">
+                    <field name="problems">
+						<tree editable="bottom" string="Problems" create="false" delete="false">
+                            <field name="product"/>
+                            <field name="problem"/>
+                        </tree>
+                    </field>
+                    <footer>
+                        <button name="start" string="Start searching" type="object" class="oe_highlight"/> or
+                        <button special="cancel" string="Cancel" type="object" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_report_product_problems" model="ir.actions.act_window">
+            <field name="name">Product Problem Analyser</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">webdust.product.problem.detector</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem action="action_report_product_problems"
+            groups="clubit_tools.clubit_tools_edi_user"
+            id="menu_webdust_report_product_problems" parent="clubit_tools.menu_clubit_tools_reporting"/>
+
+    </data>
+</openerp>
