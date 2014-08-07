@@ -15,7 +15,8 @@
     'data': [
         'product.xml',
         'property.xml',
-        'supplierinfo.xml'
+        'supplierinfo.xml',
+        'wizard/price_export_view.xml'
     ],
     'demo': [
     ],

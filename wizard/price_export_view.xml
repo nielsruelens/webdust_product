@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="product_price_export_view" model="ir.ui.view">
+            <field name="name">product.price.export.view</field>
+            <field name="model">webdust.product.price.export</field>
+            <field name="arch" type="xml">
+                <form string="Export Product Prices" version="7.0">
+                    <field invisible="1" name="state"/>
+                    <field name="name" invisible="1"/>
+                    <group states="choose" string="Export Settings">
+                        <field name="partner"/>
+                    </group>
+                    <div states="get">
+                        <h2>Export Complete</h2>
+                        <p>Here is the exported product price file: <field name="data" readonly="1" filename="name"/></p>
+                        <p>This file was generated using the universal <strong>Unicode/UTF-8</strong> file encoding, please be sure to view and edit
+                           using the same encoding.</p>
+                    </div>
+                    <footer states="choose">
+                        <button name="act_getfile" string="Export" type="object" class="oe_highlight"/> or
+                        <button special="cancel" string="Cancel" type="object" class="oe_link"/>
+                    </footer>
+                    <footer states="get">
+                        <button special="cancel" string="Close" type="object"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_report_product_prices" model="ir.actions.act_window">
+            <field name="name">Export Product Prices</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">webdust.product.price.export</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem action="action_report_product_prices"
+            groups="clubit_tools.clubit_tools_edi_user"
+            id="menu_webdust_report_product_prices" parent="clubit_tools.menu_clubit_tools_reporting"/>
+
+    </data>
+</openerp>
