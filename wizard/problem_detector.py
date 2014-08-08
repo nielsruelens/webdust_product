@@ -87,7 +87,7 @@ class webdust_product_problem_detector(osv.TransientModel):
 
         # Find products that should be sellable
         # -------------------------------------
-        products = prod_db.search(cr, uid, [('sale_ok', '=', False),('supplier_storage_location','=','1015'),('procure_method','=','make_to_stock')])
+        products = prod_db.search(cr, uid, [('sale_ok', '=', False),('supplier_storage_location','=','1015'),('procure_method','=','make_to_order')])
         if products:
             products = prod_db.read(cr, uid, products, ['id', 'state', 'seller_ids'])
             suppliers = supplier_db.browse(cr, uid, [item for sublist in [x['seller_ids'] for x in products] for item in sublist])
@@ -100,7 +100,7 @@ class webdust_product_problem_detector(osv.TransientModel):
                 sale_ok = False
                 for s in product['seller_ids']:
                     supplier = [x for x in suppliers if x.id == s][0]
-                    if supplier.state in ('available','limited') and supplier.product_code:
+                    if supplier.state in ('available','limited') and supplier.product_code and len(supplier.pricelist_ids) > 0:
                         sale_ok = True
                 if sale_ok:
                     result.append((0,0,{'product': product['id'], 'problem': 'Product should be sellable, yet it is not!.'}))
