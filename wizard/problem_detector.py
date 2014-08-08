@@ -26,7 +26,7 @@ class webdust_product_problem_detector(osv.TransientModel):
         this = self.browse(cr, uid, ids)[0]
 
         problems = self.calculate(cr, uid)
-        problems = [item for sublist in [x for x in problems] for item in sublist] #flatten the list
+        #problems = [item for sublist in [x for x in problems] for item in sublist] #flatten the list
 
 
         self.write(cr, uid, ids, {'problems': problems}, context=context)
@@ -51,21 +51,59 @@ class webdust_product_problem_detector(osv.TransientModel):
 
     def calculate(self, cr, uid):
         prod_db = self.pool.get('product.product')
-        products = prod_db.search(cr, uid, [('sale_ok', '=', True)])
-        if not products: return []
-        products = prod_db.read(cr, uid, products, ['id', 'state', 'seller_ids', 'supplier_storage_location'])
-
+        supplier_db = self.pool.get('product.supplierinfo')
         result = []
 
-        # The easy ones
-        # -------------
-        result.append([(0,0,{'product': x['id'], 'problem': 'Product is obsolete, yet it is sellable.'}) for x in products if x['state'] == 'obsolete'])
-        result.append([(0,0,{'product': x['id'], 'problem': 'Product is in draft, yet it is sellable.'}) for x in products if x['state'] == 'draft'])
-        result.append([(0,0,{'product': x['id'], 'problem': 'Product does not have any sellers, yet it is sellable.'}) for x in products if not x['seller_ids']])
-        result.append([(0,0,{'product': x['id'], 'problem': 'Product does not have supplier storage location 1015, yet it is sellable.'}) for x in products if  x['supplier_storage_location'] != '1015'])
+        # Find products that shouldn't be sellable
+        # ----------------------------------------
+        products = prod_db.search(cr, uid, [('sale_ok', '=', True)])
+        if products:
+            products = prod_db.read(cr, uid, products, ['id', 'state', 'seller_ids', 'supplier_storage_location'])
+            suppliers = supplier_db.browse(cr, uid, [item for sublist in [x['seller_ids'] for x in products] for item in sublist])
 
-        # The hard ones
-        # -------------
+            for product in products:
+                if product['state'] == 'obsolete':
+                    result.append((0,0,{'product': product['id'], 'problem': 'Product is obsolete, yet it is sellable.'}))
+                    continue
+                if product['state'] == 'draft':
+                    result.append((0,0,{'product': product['id'], 'problem': 'Product is in draft, yet it is sellable.'}))
+                    continue
+                if len(product['seller_ids']) == 0:
+                    result.append((0,0,{'product': product['id'], 'problem': 'Product does not have any sellers, yet it is sellable.'}))
+                    continue
+                if product['supplier_storage_location'] != '1015':
+                    result.append((0,0,{'product': product['id'], 'problem': 'Product does not have supplier storage location 1015, yet it is sellable.'}))
+                    continue
+
+                problem = True
+                for s in product['seller_ids']:
+                    supplier = [x for x in suppliers if x.id == s][0]
+                    if supplier.state in ('available','limited') and supplier.product_code:
+                        problem = False
+                if problem:
+                    result.append((0,0,{'product': product['id'], 'problem': 'Product has invalid or missing supplier information, yet it is sellable.'}))
+                    continue
+
+
+        # Find products that should be sellable
+        # -------------------------------------
+        products = prod_db.search(cr, uid, [('sale_ok', '=', False),('supplier_storage_location','=','1015'),('procure_method','=','make_to_stock')])
+        if products:
+            products = prod_db.read(cr, uid, products, ['id', 'state', 'seller_ids'])
+            suppliers = supplier_db.browse(cr, uid, [item for sublist in [x['seller_ids'] for x in products] for item in sublist])
+
+            for product in products:
+
+                if product['state'] in ('obsolete', 'draft') or len(product['seller_ids']) == 0:
+                    continue
+
+                sale_ok = False
+                for s in product['seller_ids']:
+                    supplier = [x for x in suppliers if x.id == s][0]
+                    if supplier.state in ('available','limited') and supplier.product_code:
+                        sale_ok = True
+                if sale_ok:
+                    result.append((0,0,{'product': product['id'], 'problem': 'Product should be sellable, yet it is not!.'}))
 
         return result
 
