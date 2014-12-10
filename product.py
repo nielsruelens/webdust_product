@@ -87,10 +87,10 @@ class product_product(osv.Model):
 
             # Make to stock
             # -------------
-            elif product.procure_method == 'make_to_stock':
-                vals = {'sale_ok' : True, 'purchase_ok' : False}
-                if product.state == 'obsolete' or product.qty_available == 0:
-                    vals = {'sale_ok' : False, 'purchase_ok' : False}
+            # elif product.procure_method == 'make_to_stock':
+            #     vals = {'sale_ok' : True, 'purchase_ok' : False}
+            #     if product.state == 'obsolete' or product.qty_available == 0:
+            #         vals = {'sale_ok' : False, 'purchase_ok' : False}
 
             # Calculate change hash
             # ---------------------
