@@ -68,9 +68,8 @@ class product_product(osv.Model):
         # in a tiresome comparison process
         # ------------------------------------------------------------
         result = super(product_product, self).write(cr, uid, ids, vals, context=context)
-
+	
         for product in self.browse(cr, uid, ids, context=context):
-
             # Make to order
             # -------------
             if product.procure_method == 'make_to_order':
@@ -87,21 +86,25 @@ class product_product(osv.Model):
 
             # Make to stock
             # -------------
-            elif product.procure_method == 'make_to_stock':
-                vals = {'sale_ok' : True, 'purchase_ok' : False}
-                if product.state == 'obsolete' or product.qty_available == 0:
-                    vals = {'sale_ok' : False, 'purchase_ok' : False}
+            # elif product.procure_method == 'make_to_stock':
+            #     vals = {'sale_ok' : True, 'purchase_ok' : True}
+            #     if product.state == 'obsolete' or product.qty_available == 0:
+            #         vals = {'sale_ok' : False, 'purchase_ok' : False}
 
             # Calculate change hash
             # ---------------------
             change_hash = [
-                product.name,                   vals['sale_ok'],
-                product.short_description,      vals['purchase_ok'],
+                product.name,                   
+                product.short_description,      
                 product.procure_method,         product.type,
                 product.state,                  product.recommended_price,
                 product.ean13,                  product.categ_id.id,
                 product.cost_method,            product.supplier_storage_location
             ]
+            if vals.get('sale_ok'):
+              change_hash.append(vals['sale_ok'])
+            if vals.get('purchase_ok'):
+              change_hash.append(vals['purchase_ok'])
             change_hash.append([x.id for x in product.taxes_id])
             change_hash.append([x.id for x in product.supplier_taxes_id])
             change_hash.append([(x.supplier.id, x.url) for x in product.images])
