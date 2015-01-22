@@ -3,12 +3,9 @@ from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
 class product_supplierinfo(osv.Model):
-
     _name = "product.supplierinfo"
     _inherit = 'product.supplierinfo'
     _description = "Supplierinfo extensions"
-
-
 
     def _default_price(self, cr, uid, ids, field_name, arg, context=None):
         ''' product.supplierinfo:_default_price()
@@ -29,6 +26,7 @@ class product_supplierinfo(osv.Model):
                                       method=True,
                                       string='Lowest Price',
                                       digits_compute = dp.get_precision('Sale Price')),
+        'on_hand_qty': fields.float('Quantity On Hand', help="Indication of the stock level at the supplier"),
     }
 
     _defaults = {
