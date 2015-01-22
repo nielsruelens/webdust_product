@@ -77,8 +77,6 @@ class product_product(osv.Model):
 
                 if product.state == 'obsolete' or len(product.seller_ids) == 0 or not product.cost_price or product.supplier_storage_location != '1015':
                     vals = {'sale_ok' : False, 'purchase_ok' : False}
-                elif not [x for x in product.seller_ids if x.state in ('available','limited') and x.product_code]:
-                    vals = {'sale_ok' : False, 'purchase_ok' : False}
                 elif product.state == 'draft':
                     vals = {'sale_ok' : False, 'purchase_ok' : True}
                 elif product.state == 'end':
