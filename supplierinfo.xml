@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='product_code']" position="after">
 					<field name="state"/>
+                    <field name="on_hand_qty"/>
 				</xpath>
             </field>
         </record>
